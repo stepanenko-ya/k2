@@ -45,13 +45,19 @@ def pars():
         urls_file.close()
 
 
+def product(u):
+    html_product = get_html(u, proxy_lst)
+    soup = BeautifulSoup(html_product, "html.parser")
+    item = soup.find(class_="")
+
+
 if __name__ == '__main__':
 
     # pars()
     urls = open('categors_urls.txt', "r")
     u = urls.readline().strip()
+    product(u)
 
-    get_html(u, proxy_lst)
 
 
 
