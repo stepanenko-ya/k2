@@ -3,21 +3,26 @@ import requests
 from random import choice
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
-import datetime
-import time
+import pymssql
+
+# conn = pymssql.connect(
+#     server="10.175.1.60:1433",
+#     user="importer_doc",
+#     password='QAZxsw123',
+#     database="Test")
+#
+# db = conn.cursor()
 
 GLOBAL_URL = 'https://k2.com.pl'
 
 
-proxy_lst = ['177.229.130.68:8080', '45.70.197.222:999', '168.119.137.56:3128','167.172.37.26:8080',
-             '143.198.56.222:8888', '207.154.254.25:8080', '20.71.134.39:8080', '132.248.196.2:8080',
-             '188.166.111.50:3128', '143.198.237.1:8080', '40.85.152.26:8080', '64.225.8.192:80', '162.255.201.37:8080',
-             '165.227.229.14:8080', '149.28.94.152:8080', '188.166.210.52:8080', '162.255.201.37:8080',
-             '178.128.242.151:8080', '188.166.168.240:8080', '35.72.9.225:80', '141.226.18.206:8080',
-             '167.172.191.249:34951', '93.157.251.134:3128', '42.117.228.47:80', '194.250.57.253:8080',
-             '167.172.191.249:34584', '143.198.237.1:8080']
+proxy_lst = ['188.166.125.206:35145', '159.65.43.120:8080',
+             '132.248.196.2:8080', '167.172.37.26:8080', '143.198.237.1:8080',
+             '162.255.201.37:8080', '188.166.168.240:8080', '35.72.9.225:80',
+             '167.172.37.26:8080', '219.92.3.149:8080', '164.90.164.161:8080',
+             '188.240.71.213:3128', '203.74.120.79:3128', '167.99.54.28:8080'
+             ]
 # url = 'https://api.myip.com/'
-# url = 'https://www.myxa.com.ua/srs/get-ip/'
 
 
 
@@ -61,8 +66,6 @@ def category():
 def product():
     urls = open('categories.txt', "r")
     category_url = urls.readlines()
-
-
     for cat_url in category_url[:-2]:
         print(cat_url.strip())
         html_product = get_html(cat_url.strip(), proxy_lst)
@@ -96,12 +99,67 @@ def product():
         urls_file.close()
 
 
+def parsing():
 
-# _____________________________________________________________________________________________
+
+    items_list = open("items_url.txt", "r")
+    items_set = set(items_list.readlines())
+
+    for item in list(items_set):
+        if item.strip() != "https://k2.com.pl/produkty/w222-niska-sila-50-g":
+            html_content = get_html(item.strip(), proxy_lst)
+            soup = BeautifulSoup(html_content, "html.parser")
+            item_file = open('item_file.txt', "a+")
+            name = soup.find(class_="col-md-8 product-images").find("h1").get_text().strip()
+
+            description = soup.find(id="opis").get_text()
+            shot_descript = soup.find(class_="description-short").get_text()
+            desct = shot_descript + description
+            all_discript = desct.replace("\n", ' ').replace("'", '')
+            numbers = soup.find(class_="product-index").get_text().strip().split("\n")
+            index = numbers[0].split(":")[1].strip()
+            barcode = numbers[1].split(":")[1].strip()
+            item_file.write(index + "|" + barcode + "|" + name + "|" + item.strip() + "|" + all_discript +"\n")
+            item_file.close()
+            # # db.execute(f"INSERT INTO {schema_name}.items (vendor_code, name, item_url, barcode, discript) VALUES (N'{index}', N'{name}', N'{item.strip()}', N'{barcode}', N'{all_discript}')")
+            # # conn.commit()
+            #
+            images = soup.find(class_="product-image").find_all("a")
+            photo_file = open('photos.csv', "a+")
+            for img in images:
+                photo = img.get("href")
+
+            #     photo_file.write(index + "|" + barcode + "|" + photo + "\n")
+            photo_file.close()
+            #     # db.execute(f"INSERT INTO {schema_name}.photos ("
+            #     #            f"vendor_code,photo) VALUES (N'{index}', N'{photo}')")
+            #     # conn.commit()
+        else:
+            pass
+
+
+def creating():
+    db.execute(f"CREATE SCHEMA {schema_name}")
+    conn.commit()
+#
+    db.execute(f"CREATE TABLE {schema_name}.items (id int IDENTITY(1,1), "
+               f"vendor_code NVARCHAR(230), "
+               f"name NVARCHAR(355), "
+               f"item_url NVARCHAR(330),"
+               f"barcode NVARCHAR(330), "
+               f"discript ntext)")
+    conn.commit()
+
+    db.execute(f"CREATE TABLE {schema_name}.photos (id int IDENTITY(1,1),  vendor_code NVARCHAR (130), photo NVARCHAR (330))")
+    conn.commit()
+
+
 if __name__ == '__main__':
+    schema_name = "k2"
+    # creating()
     # category()
-    product()
-
+    # product()
+    parsing()
 
 
 
