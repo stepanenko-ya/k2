@@ -16,5 +16,22 @@ db.executemany(sql, result)
 conn.commit()
 
 
-# db.execute("DELETE  FROM k2.items WHERE item_url LIKE'%cardos%'")
-# conn.commit()
+
+db.execute("select  * from k2.items WHERE vendor_code ='P90610'")
+result = db.fetchall()
+print(result)
+# url = "https://k2.com.pl/produkty"
+# html = get_html(url, proxy_lst)
+#
+# soup = BeautifulSoup(html, "html.parser")
+# finders = soup.find_previous(class_="fa fa-arrow-down")
+# print(finders)
+# # for finder in finders:
+# #     url = finder.find("a").get("href")
+# #     print(url)
+# # for finder in finders:
+# #     url = finder.find("a").get('href')
+# #
+# #     urls_file = open('categories.txt', "a+")
+# #     urls_file.write(GLOBAL_URL + url + '\n')
+# #     urls_file.close()

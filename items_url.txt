@@ -29,7 +29,6 @@ https://k2.com.pl/produkty/k2-bono-300-ml
 https://k2.com.pl/produkty/k2-oskar-770-ml
 https://k2.com.pl/produkty/k2-polo-cockpit-200-ml
 https://k2.com.pl/produkty/k2-niewidzialna-wycieraczka-200-ml
-https://k2.com.pl/produkty/k2-motor-flush-250-ml
 https://k2.com.pl/produkty/k2-balsam-700-ml
 https://k2.com.pl/produkty/k2-ultra-wax-250-g
 https://k2.com.pl/produkty/k2-express-500-ml
@@ -659,6 +658,7 @@ https://k2.com.pl/produkty/k2-texar-15w40-5l-xl
 https://k2.com.pl/produkty/k2-texar-5w40-5l-xn
 https://k2.com.pl/produkty/k2-texar-5w40-1l-xn-td
 https://k2.com.pl/produkty/k2-stroke-czerwony-2t-500ml
+https://k2.com.pl/produkty/k2-motor-flush-250-ml
 https://k2.com.pl/produkty/k2-autoband
 https://k2.com.pl/produkty/k2-mega-bond
 https://k2.com.pl/produkty/k2-mega-pren-40-ml
