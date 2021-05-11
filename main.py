@@ -120,9 +120,8 @@ def cardos(cat_url):
 
     for el in cardos_lst:
         time.sleep(16)
-        e = 0
-        e += 1
-        print(el.strip(), e)
+
+        print(el.strip())
         product_html = get_html(el.strip(), proxy_lst)
         soup = BeautifulSoup(product_html, "html.parser")
         name = soup.find(class_="product-page").find(class_="title").get_text()
@@ -145,24 +144,24 @@ def cardos(cat_url):
             conn.commit()
     os.remove("/home/stepanenko/Projects/parsing_blocks/k2/other_shop")
 
-def masner():
+def masner(cat_url):
     GLOBAL_URL = 'https://k2.com.pl'
-    # print(categories)
-    # file_cardos = open('cardos', "a+")
+
+    # file_cardos = open('other_shop', "a+")
     # main_URL = "http://masner.com"
-    # cardos_html = get_html(url)
+    # cardos_html = get_html(cat_url, proxy_lst)
     # cardos_soup = BeautifulSoup(cardos_html, "html.parser")
     # category_cardos = cardos_soup.find(class_="catid-120").find("a").get("href")
     #
     # cardos_link = main_URL + category_cardos
-    # html_pagination = get_html(cardos_link)
+    # html_pagination = get_html(cardos_link, proxy_lst)
     # if html_pagination != None:
     #     pagination_soup = BeautifulSoup(html_pagination, "html.parser")
     #     max_pagination = pagination_soup.find(class_="pagination").find_all("a")[-1].get("href").split("=")[1]
     #     print(max_pagination)
     #     for i in range(1, int(max_pagination) + 1):
     #         link_with_pagination = cardos_link + "?page=" + str(i)
-    #         cardos_items = get_html(link_with_pagination)
+    #         cardos_items = get_html(link_with_pagination, proxy_lst)
     #         items_soup = BeautifulSoup(cardos_items, "html.parser")
     #         all_blocks = items_soup.find_all(class_="block")
     #         for block in all_blocks:
@@ -171,13 +170,13 @@ def masner():
     #     file_cardos.close()
     # else:
     #     print("error")
-    file_card = open('cardos', 'r')
+    file_card = open('other_shop', 'r')
     cardos_lst = file_card.readlines()
 
     for el in cardos_lst:
 
         print(el.strip())
-        product_html = get_html(el.strip())
+        product_html = get_html(el.strip(), proxy_lst)
         soup = BeautifulSoup(product_html, "html.parser")
         product = soup.find(class_="product-page")
         if product:
@@ -213,11 +212,11 @@ def masner():
 def parsing_other_shops(categories):
     for cat_url in categories:
 
-        if cat_url == 'http://cardos.com/produkty':
-            cardos(cat_url)
+        # if cat_url == 'http://cardos.com/produkty':
+        #     cardos(cat_url)
 
-        # elif cat_url.strip() == 'http://masner.com/produkty':
-        #     masner()
+        if cat_url.strip() == 'http://masner.com/produkty':
+            masner(cat_url)
 
 
 def parsing_product_k2():
@@ -274,7 +273,7 @@ if __name__ == '__main__':
     categories = category()
     # parsing_items_url(categories)
     # parsing_product_k2()
-    parsing_other_shops(categories)
+    # parsing_other_shops(categories)
 
 
 
