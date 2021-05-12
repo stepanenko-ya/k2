@@ -4,26 +4,33 @@ from random import choice
 from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 import pymssql
+import psycopg2
 import time
 import os
 
-conn = pymssql.connect(
-    server="10.175.1.60:1433",
-    user="importer_doc",
-    password='QAZxsw123',
-    database="Test")
+# conn = pymssql.connect(
+#     server="10.175.1.60:1433",
+#     user="importer_doc",
+#     password='QAZxsw123',
+#     database="Test")
+#
+# db = conn.cursor()
+conn = psycopg2.connect(
+    host='localhost',
+    user='step',
+    password='Stomatolog',
+    database='yana_db')
 
 db = conn.cursor()
-
 GLOBAL_URL = 'https://k2.com.pl'
 
 
-# proxy_lst = ['142.44.136.219:32768', '167.99.54.28:8080', '150.136.5.47:80', '167.99.126.178:8080',
-#              '167.99.59.236:8080', '18.223.113.144:3128', '167.99.112.188:8080', '162.255.201.37:8080',
-#              '51.222.67.219:32768', '198.50.163.192:3129', '178.62.127.204:8080', '104.131.59.152:8080',
-#              '178.62.61.32:8080', '188.240.71.213:3128', '52.143.81.17:3128', '51.158.123.35:9999',
-#              '46.101.83.76:8080', '167.172.37.26:8080', '46.101.130.118:8080', '168.119.137.56:3128']
-proxy_lst = ['167.99.112.188:8080']
+# # proxy_lst = ['142.44.136.219:32768', '167.99.54.28:8080', '150.136.5.47:80', '167.99.126.178:8080',
+# #              '167.99.59.236:8080', '18.223.113.144:3128', '167.99.112.188:8080', '162.255.201.37:8080',
+# #              '51.222.67.219:32768', '198.50.163.192:3129', '178.62.127.204:8080', '104.131.59.152:8080',
+# #              '178.62.61.32:8080', '188.240.71.213:3128', '52.143.81.17:3128', '51.158.123.35:9999',
+# #              '46.101.83.76:8080', '167.172.37.26:8080', '46.101.130.118:8080', '168.119.137.56:3128']
+proxy_lst = []
 
 def get_html(url, proxy_lst):
     ua = UserAgent()
@@ -35,7 +42,8 @@ def get_html(url, proxy_lst):
 
         prox = {"http": "http://" + rand_ip, "https": "http://" + rand_ip}
         try:
-            req = requests.get(url, headers={"User-Agent": UserAgent().chrome}, proxies=prox, timeout=10)
+            req = requests.get(url, headers={"User-Agent": UserAgent().chrome},
+                               timeout=10)
         except:
             print("Try")
         else:
@@ -95,26 +103,26 @@ def parsing_items_url(categories):
 
 
 def cardos(cat_url):
-    # file_cardos = open('other_shop', "a+")
-    # cardos_URL = "http://cardos.com"
-    # cardos_html = get_html(cat_url, proxy_lst)
-    # cardos_soup = BeautifulSoup(cardos_html, "html.parser")
-    # category_cardos = cardos_soup.find(class_="catid-120").find("a").get("href")
-    # cardos_link = cardos_URL + category_cardos
-    #
-    # html_pagination = get_html(cardos_link, proxy_lst)
-    # pagination_soup = BeautifulSoup(html_pagination, "html.parser")
-    # max_pagination = pagination_soup.find(class_="pagination").find_all("a")[-1].get("href").split("=")[1]
-    #
-    # for i in range(1, int(max_pagination) + 1):
-    #     link_with_pagination = cardos_link + "?page=" + str(i)
-    #     cardos_items = get_html(link_with_pagination, proxy_lst)
-    #     items_soup = BeautifulSoup(cardos_items, "html.parser")
-    #     all_blocks = items_soup.find_all(class_="block")
-    #     for block in all_blocks:
-    #         item_url = block.find("a").get("href")
-    #         file_cardos.write(cardos_URL + item_url + '\n')
-    # file_cardos.close()
+    file_cardos = open('other_shop', "a+")
+    cardos_URL = "http://cardos.com"
+    cardos_html = get_html(cat_url, proxy_lst)
+    cardos_soup = BeautifulSoup(cardos_html, "html.parser")
+    category_cardos = cardos_soup.find(class_="catid-120").find("a").get("href")
+    cardos_link = cardos_URL + category_cardos
+
+    html_pagination = get_html(cardos_link, proxy_lst)
+    pagination_soup = BeautifulSoup(html_pagination, "html.parser")
+    max_pagination = pagination_soup.find(class_="pagination").find_all("a")[-1].get("href").split("=")[1]
+
+    for i in range(1, int(max_pagination) + 1):
+        link_with_pagination = cardos_link + "?page=" + str(i)
+        cardos_items = get_html(link_with_pagination, proxy_lst)
+        items_soup = BeautifulSoup(cardos_items, "html.parser")
+        all_blocks = items_soup.find_all(class_="block")
+        for block in all_blocks:
+            item_url = block.find("a").get("href")
+            file_cardos.write(cardos_URL + item_url + '\n')
+    file_cardos.close()
     file_card = open('other_shop', 'r')
     cardos_lst = file_card.readlines()
 
@@ -142,34 +150,33 @@ def cardos(cat_url):
             photo = photo_href.get("href")
             db.execute(f"INSERT INTO {schema_name}.photos (vendor_code, barcode, photo) VALUES (N'{index}', N'{barcode}', N'{photo}')")
             conn.commit()
-    os.remove("/home/stepanenko/Projects/parsing_blocks/k2/other_shop")
+    os.remove("/home/yevhen7/Documents/yana/k2/k2/other_shop")
 
 def masner(cat_url):
-    GLOBAL_URL = 'https://k2.com.pl'
 
-    # file_cardos = open('other_shop', "a+")
-    # main_URL = "http://masner.com"
-    # cardos_html = get_html(cat_url, proxy_lst)
-    # cardos_soup = BeautifulSoup(cardos_html, "html.parser")
-    # category_cardos = cardos_soup.find(class_="catid-120").find("a").get("href")
-    #
-    # cardos_link = main_URL + category_cardos
-    # html_pagination = get_html(cardos_link, proxy_lst)
-    # if html_pagination != None:
-    #     pagination_soup = BeautifulSoup(html_pagination, "html.parser")
-    #     max_pagination = pagination_soup.find(class_="pagination").find_all("a")[-1].get("href").split("=")[1]
-    #     print(max_pagination)
-    #     for i in range(1, int(max_pagination) + 1):
-    #         link_with_pagination = cardos_link + "?page=" + str(i)
-    #         cardos_items = get_html(link_with_pagination, proxy_lst)
-    #         items_soup = BeautifulSoup(cardos_items, "html.parser")
-    #         all_blocks = items_soup.find_all(class_="block")
-    #         for block in all_blocks:
-    #             item_url = block.find("a").get("href")
-    #             file_cardos.write(main_URL + item_url + '\n')
-    #     file_cardos.close()
-    # else:
-    #     print("error")
+    file_cardos = open('other_shop', "a+")
+    main_URL = "http://masner.com"
+    cardos_html = get_html(cat_url, proxy_lst)
+    cardos_soup = BeautifulSoup(cardos_html, "html.parser")
+    category_cardos = cardos_soup.find(class_="catid-120").find("a").get("href")
+
+    cardos_link = main_URL + category_cardos
+    html_pagination = get_html(cardos_link, proxy_lst)
+    if html_pagination != None:
+        pagination_soup = BeautifulSoup(html_pagination, "html.parser")
+        max_pagination = pagination_soup.find(class_="pagination").find_all("a")[-1].get("href").split("=")[1]
+        print(max_pagination)
+        for i in range(1, int(max_pagination) + 1):
+            link_with_pagination = cardos_link + "?page=" + str(i)
+            cardos_items = get_html(link_with_pagination, proxy_lst)
+            items_soup = BeautifulSoup(cardos_items, "html.parser")
+            all_blocks = items_soup.find_all(class_="block")
+            for block in all_blocks:
+                item_url = block.find("a").get("href")
+                file_cardos.write(main_URL + item_url + '\n')
+        file_cardos.close()
+    else:
+        print("error")
     file_card = open('other_shop', 'r')
     cardos_lst = file_card.readlines()
 
@@ -200,20 +207,21 @@ def masner(cat_url):
             imgs = soup.find(class_="previews").find_all('a')
             for photo_href in imgs:
                 photo = photo_href.get("href")
+
                 db.execute(f"INSERT INTO {schema_name}.photos ("
-                           f"vendor_code,photo) VALUES (N'{index}', N'{photo}')")
+                           f"vendor_code, barcode, photo) VALUES (N'{index}', N'{barcode}', N'{photo}')")
                 conn.commit()
 
         else:
             print("product is out in stock ", el)
-    os.remove("/home/stepanenko/Projects/parsing_blocks/k2/other_shop")
+    os.remove("/home/yevhen7/Documents/yana/k2/k2/other_shop")
 
 
 def parsing_other_shops(categories):
     for cat_url in categories:
 
-        # if cat_url == 'http://cardos.com/produkty':
-        #     cardos(cat_url)
+        if cat_url == 'http://cardos.com/produkty':
+            cardos(cat_url)
 
         if cat_url.strip() == 'http://masner.com/produkty':
             masner(cat_url)
@@ -224,6 +232,7 @@ def parsing_product_k2():
     items_set = set(items_list.readlines())
 
     for item in list(items_set):
+        print(item.strip())
         if item.strip() != "https://k2.com.pl/produkty/w222-niska-sila-50-g":
             html_content = get_html(item.strip(), proxy_lst)
             soup = BeautifulSoup(html_content, "html.parser")
@@ -236,14 +245,14 @@ def parsing_product_k2():
             index = numbers[0].split(":")[1].strip()
             barcode = numbers[1].split(":")[1].strip()
 
-            db.execute(f"INSERT INTO {schema_name}.items (vendor_code, name, item_url, barcode, discript) VALUES (N'{index}', N'{name}', N'{item.strip()}', N'{barcode}', N'{all_discript}')")
+            db.execute(f"INSERT INTO {schema_name}.items (vendor_code, barcode, name, item_url, discript) VALUES (N'{index}', N'{barcode}', N'{name}', N'{item.strip()}', N'{all_discript}')")
             conn.commit()
 
             images = soup.find(class_="product-image").find_all("a")
             for img in images:
                 photo = img.get("href")
                 db.execute(f"INSERT INTO {schema_name}.photos ("
-                           f"vendor_code,photo) VALUES (N'{index}', N'{photo}')")
+                           f"vendor_code,barcode, photo) VALUES (N'{index}', N'{barcode}',N'{photo}')")
                 conn.commit()
         else:
             pass
@@ -253,27 +262,29 @@ def creating():
     db.execute(f"CREATE SCHEMA {schema_name}")
     conn.commit()
 
-    db.execute(f"CREATE TABLE {schema_name}.items (id int IDENTITY(1,1), "
-               f"vendor_code NVARCHAR(230), "
-               f"barcode NVARCHAR(330), "
-               f"name NVARCHAR(355), "
-               f"item_url NVARCHAR(330),"
-               f"discript ntext)")
+    db.execute(f"create table {schema_name}.items (id SERIAL , "
+               f"vendor_code nchar(230), "
+               f"barcode nchar(330), "
+               f"name nchar(355), "
+               f"item_url nchar(330),"
+               f"discript text)")
     conn.commit()
 
-    db.execute(f"CREATE TABLE {schema_name}.photos (id int IDENTITY(1,1),  vendor_code NVARCHAR (130), "
-               f"barcode NVARCHAR (130), photo NVARCHAR (330))")
+    db.execute(f"CREATE TABLE {schema_name}.photos (id  SERIAL,  "
+               f"vendor_code nchar (130), "
+               f"barcode nchar (130), "
+               f"photo nchar (330))")
     conn.commit()
 
 
 if __name__ == '__main__':
     main_url = "https://k2.com.pl/produkty"
     schema_name = "k2"
-    # creating()
+    creating()
     categories = category()
-    # parsing_items_url(categories)
-    # parsing_product_k2()
-    # parsing_other_shops(categories)
+    parsing_items_url(categories)
+    parsing_product_k2()
+    parsing_other_shops(categories)
 
 
 
